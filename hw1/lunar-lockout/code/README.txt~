@@ -1,0 +1,31 @@
+The code has been written in CPP and is organized as follows:
+
+1. Breadth_first.cpp :
+This file contains the main planner(BFS)
+
+2. problem_file.cpp :
+This file contains the declarations, type definitions, for the breadth_first.cpp
+
+3.  descriptions.cpp :
+This file has the definitions of all the actions and axioms. It also returns successor states for the bfs planner
+
+4. domain_file.cpp:
+This file has the domain declarations for the chosen representation
+
+TO RUN THE PLANNER:
+
+1. Execute the ./lunar-lockout problem_file.cpp domain_file.cpp.
+2. This executes the planner for problem no 36 right now. Number of states explored and the final plan are displayed.
+3. For running problem 9, 18, 27, uncomment the corresponding initialization blocks in the main() function of breadth_first.cpp.
+4. For executing planner for any other problem, uncomment the general initialization section in main in breadth_first.cpp. Change the intial state(in terms of x,y in start_Array[])
+The spaceships in start_array are in this order:
+Red, Yellow, Orange, Purple, Green, Blue
+The x,y coordinate system starts from lower-left corener of grid. First cell is 
+thus (0,0).
+Add the x,y locations in this function in the state array:
+locationToId(dim_board,x,y)
+5. Compile using: g++ -o lunar-lockout breadth_first.cpp descriptions.cpp
+Execute ./lunar-lockout problem_file.cpp domain_file.cpp
+
+
+P.S. Due to some C++ memory allocation issues, I had to hardcode the problems in breadth_first.cpp file. I could not resolve the issue due to lack of time. 
