@@ -89,70 +89,75 @@ int locationToId(int board_dim, int x, int y)
 int main(int argc, char *argv[])
 {
 	cout<<"initializing"<<endl;
-	ifstream infile(argv[1]);
-    string STRING;
-    node* start = new node;
-	node* goal = new node;
-	int problem_num;
-	while (getline(infile, STRING))
+	if (argc != 2)
+		cout<<"Please pass the arguments"<<endl;
+	else
 	{
-		string prob = "problem ";
-		if (STRING.find(prob)!=STRING.npos)
-			problem_num = atoi(STRING.substr(prob.length()).c_str());
-		string bd = "board dimensions ";
-		if (STRING.find(bd)!=STRING.npos)
-			dim_board = atoi(STRING.substr(bd.length()).c_str());
-		string num_ob = "number of objects ";
-		if (STRING.find(num_ob)!=STRING.npos)
-			num_objects = atoi(STRING.substr(num_ob.length()).c_str());
-		string ob = "spaceships ";
-		if (STRING.find(ob)!=STRING.npos)
-			for (int i = 0; i < num_objects; i++)
-				spaceships.push_back(STRING.substr(ob.length()+i)[0]);
-		string sr = "start ";
-		if (STRING.find(sr)!=STRING.npos)
+		ifstream infile(argv[1]);
+	    string STRING;
+	    node* start = new node;
+		node* goal = new node;
+		int problem_num;
+		while (getline(infile, STRING))
 		{
-			string locs = STRING.substr(sr.length());
-			for (int i = 0; i < num_objects; i++)
-				if (locs.find(spaceships[i])!=locs.npos)
-				{
-					int len_x = locs.find_first_of(",",locs.find(spaceships[i])) - locs.find_first_of(" ",locs.find(spaceships[i])) - 1;
-					int len_y;
-					if (i!=(num_objects - 1))
-						len_y = locs.find_last_of(" ",locs.find(spaceships[i+1])) - locs.find_first_of(",",locs.find(spaceships[i])) - 1;
-					else
-						len_y = locs.substr(locs.find_first_of(",",locs.find(spaceships[i]))).length()-1;
-					int x = atoi(locs.substr(locs.find(spaceships[i])+2,len_x).c_str());
-					int y = atoi(locs.substr(locs.find_first_of(",",locs.find(spaceships[i]))+1,len_y).c_str());
-					start->st.push_back(locationToId(dim_board,x,y));
-				}
+			string prob = "problem ";
+			if (STRING.find(prob)!=STRING.npos)
+				problem_num = atoi(STRING.substr(prob.length()).c_str());
+			string bd = "board dimensions ";
+			if (STRING.find(bd)!=STRING.npos)
+				dim_board = atoi(STRING.substr(bd.length()).c_str());
+			string num_ob = "number of objects ";
+			if (STRING.find(num_ob)!=STRING.npos)
+				num_objects = atoi(STRING.substr(num_ob.length()).c_str());
+			string ob = "spaceships ";
+			if (STRING.find(ob)!=STRING.npos)
+				for (int i = 0; i < num_objects; i++)
+					spaceships.push_back(STRING.substr(ob.length()+i)[0]);
+			string sr = "start ";
+			if (STRING.find(sr)!=STRING.npos)
+			{
+				string locs = STRING.substr(sr.length());
+				for (int i = 0; i < num_objects; i++)
+					if (locs.find(spaceships[i])!=locs.npos)
+					{
+						int len_x = locs.find_first_of(",",locs.find(spaceships[i])) - locs.find_first_of(" ",locs.find(spaceships[i])) - 1;
+						int len_y;
+						if (i!=(num_objects - 1))
+							len_y = locs.find_last_of(" ",locs.find(spaceships[i+1])) - locs.find_first_of(",",locs.find(spaceships[i])) - 1;
+						else
+							len_y = locs.substr(locs.find_first_of(",",locs.find(spaceships[i]))).length()-1;
+						int x = atoi(locs.substr(locs.find(spaceships[i])+2,len_x).c_str());
+						int y = atoi(locs.substr(locs.find_first_of(",",locs.find(spaceships[i]))+1,len_y).c_str());
+						start->st.push_back(locationToId(dim_board,x,y));
+					}
+			}
+			string gl = "goal ";
+			if (STRING.find(gl)!=STRING.npos)
+			{
+				string locs = STRING.substr(gl.length());
+				for (int i = 0; i < num_objects; i++)
+					if (locs.find(spaceships[i])!=locs.npos)
+					{
+						int len_x = locs.find_first_of(",",locs.find(spaceships[i])) - locs.find_first_of(" ",locs.find(spaceships[i])) - 1;
+						int len_y;
+						if (i!=(num_objects - 1))
+							len_y = locs.find_last_of(" ",locs.find(spaceships[i+1])) - locs.find_first_of(",",locs.find(spaceships[i])) - 1;
+						else
+							len_y = locs.substr(locs.find_first_of(",",locs.find(spaceships[i]))).length()-1;
+						int x = atoi(locs.substr(locs.find(spaceships[i])+2,len_x).c_str());
+						int y = atoi(locs.substr(locs.find_first_of(",",locs.find(spaceships[i]))+1,len_y).c_str());
+						goal->st.push_back(locationToId(dim_board,x,y));
+					}
+			}
+				
 		}
-		string gl = "goal ";
-		if (STRING.find(gl)!=STRING.npos)
+		cout<<"solving lunar lockout puzzle number "<<problem_num<<endl;
+		for (int i = 0; i < num_objects; i++)
 		{
-			string locs = STRING.substr(gl.length());
-			for (int i = 0; i < num_objects; i++)
-				if (locs.find(spaceships[i])!=locs.npos)
-				{
-					int len_x = locs.find_first_of(",",locs.find(spaceships[i])) - locs.find_first_of(" ",locs.find(spaceships[i])) - 1;
-					int len_y;
-					if (i!=(num_objects - 1))
-						len_y = locs.find_last_of(" ",locs.find(spaceships[i+1])) - locs.find_first_of(",",locs.find(spaceships[i])) - 1;
-					else
-						len_y = locs.substr(locs.find_first_of(",",locs.find(spaceships[i]))).length()-1;
-					int x = atoi(locs.substr(locs.find(spaceships[i])+2,len_x).c_str());
-					int y = atoi(locs.substr(locs.find_first_of(",",locs.find(spaceships[i]))+1,len_y).c_str());
-					goal->st.push_back(locationToId(dim_board,x,y));
-				}
+			cout<<"spaceship "<<i<<" : "<<spaceships[i]<<" ";
 		}
-			
-	}
-	cout<<"solving lunar lockout puzzle number "<<problem_num<<endl;
-	for (int i = 0; i < num_objects; i++)
-	{
-		cout<<"spaceship "<<i<<" : "<<spaceships[i]<<" ";
-	}
-	cout<<endl;
-	bfs(start,goal, dim_board, spaceships);
+		cout<<endl;
+		bfs(start,goal, dim_board, spaceships);
+		}
 }
 
