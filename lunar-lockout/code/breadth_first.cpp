@@ -86,10 +86,10 @@ int locationToId(int board_dim, int x, int y)
 }
 
 
-int main()
+int main(int argc, char *argv[])
 {
 	cout<<"initializing"<<endl;
-	ifstream infile("problem_file.txt");
+	ifstream infile(argv[1]);
     string STRING;
     node* start = new node;
 	node* goal = new node;
