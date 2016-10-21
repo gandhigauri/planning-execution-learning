@@ -10,6 +10,7 @@
 #include <map>
 #include <limits>
 #include <algorithm>
+#include <math.h>
 
 typedef std::vector<int> state;
 
@@ -27,7 +28,7 @@ std::vector<std::vector<int> > gridCost;
 std::list<state> aStar(node*, node*);
 std::list<node*> getSuccessors(node*);
 float edgeCost(state, state);
-//float computeHeuristic(node*, node*);
+float computeHeuristic(state, state);
 
 std::set<node*> openSet;
 std::set<state> closedSet;

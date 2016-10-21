@@ -9,7 +9,7 @@ std::list<state> aStar(node* start_node, node* goal_node)
 	node* last_node = NULL;
 	start_node->g = 0;
 	goal_node->g = numeric_limits<float>::infinity();
-	start_node->h = 0;//computeHeuristic(start_node->st, goal_node->st);
+	start_node->h = computeHeuristic(start_node->st, goal_node->st);
 	start_node->f = start_node->g + start_node->h;
 	openSet.insert(start_node);
 	int total_states = 0;
@@ -50,14 +50,14 @@ std::list<state> aStar(node* start_node, node* goal_node)
 				continue;
 			neighbor->parent = current;
 			neighbor->g = neighbor_g;
-			neighbor->h = 0;//computeHeuristic(neighbor->st, goal->st);
+			neighbor->h = computeHeuristic(neighbor->st, goal_node->st);
 			neighbor->f = neighbor->g + neighbor->h;
 		}
 	
 	}
 	if (!found_goal)
 		cout<<"plan not complete"<<endl;
-	
+
 	cout<<"making final plan"<<endl;
 	cout<<"total cost of plan "<<last_node->g<<endl;
 	while (last_node->st != start_node->st)
@@ -113,6 +113,11 @@ std::list<node*> getSuccessors(node* current)
 float edgeCost(state start, state goal)
 {
 	return gridCost[goal[0]][goal[1]];
+}
+
+float computeHeuristic(state start, state goal)
+{
+	return sqrt(pow(start[0]-goal[0],2) + pow(start[1]-goal[1],2));
 }
 
 int main(int argc, char *argv[])
