@@ -17,9 +17,6 @@ std::list<state> bfs(node* start_node, node* goal_node, int board_dim, std::vect
 		total_states = total_states + 1;
 		if (closed_list.find(item->st) == closed_list.end())
 		{
-			for (int i = 0 ; i < item->st.size(); i++)
-			//cout<<" new extended state "<<item->st[i];
-			//cout<<endl;
 			closed_list.insert(item->st);
 			successors = get_successors(item, board_dim, spaceships);
 			for (std::list<node*>::iterator itr = successors.begin(); itr != successors.end(); itr ++)
@@ -43,7 +40,7 @@ std::list<state> bfs(node* start_node, node* goal_node, int board_dim, std::vect
 			break;	
 	}
 	cout<<"making final plan"<<endl;
-	while (last_node && last_node->st != start_node->st)
+	while (last_node->st != start_node->st)
 	{
 		if (last_node->st == goal_node->st)
 			path.push_front(goal_node->st);
