@@ -2,7 +2,7 @@
 
 using namespace std;
 
-std::list<state> aStar(node* start_node, node* goal_node)
+float dijkstra(node* start_node, node* goal_node)
 {
 	cout<<"starting plan"<<endl;
 	node* current = NULL;
@@ -56,31 +56,31 @@ std::list<state> aStar(node* start_node, node* goal_node)
 	
 	}
 	if (!found_goal)
-	{
 		cout<<"plan not complete"<<endl;
-		return path;
-	}
-	else
+	cout<<"making final plan"<<endl;
+	cout<<"total cost of plan "<<last_node->g<<endl;
+	while (last_node->st != start_node->st)
 	{
-		cout<<"making final plan"<<endl;
-		cout<<"total cost of plan "<<last_node->g<<endl;
-		while (last_node->st != start_node->st)
-		{
-			if (last_node->st == goal_node->st)
-				path.push_front(goal_node->st);
-			else
-				path.push_front(last_node->st);
-			if (last_node->parent != NULL)
-				last_node = last_node->parent;
-		}
-		cout<<"returning plan"<<endl;
-		cout<<"Total states explored "<<total_states<<endl;
-		path.push_front(start_node->st);
-		int num_steps = path.size();//0;
-		cout<<"total time steps "<<num_steps<<endl;
-		return path;
-		
+		if (last_node->st == goal_node->st)
+			path.push_front(goal_node->st);
+		else
+			path.push_front(last_node->st);
+		if (last_node->parent != NULL)
+			last_node = last_node->parent;
 	}
+	cout<<"returning plan"<<endl;
+	cout<<"Total states explored "<<total_states<<endl;
+	path.push_front(start_node->st);
+	int num_steps = path.size();//0;
+	cout<<"total time steps "<<num_steps<<endl;
+	/*for (std::list<state>::iterator itr = path.begin(); itr != path.end(); itr ++)
+	{
+		state next_state = *itr;
+		num_steps = num_steps + 1;
+		cout<<"t = "<<num_steps;
+		cout<<endl;
+	}*/
+	return path;
 }
 
 std::list<node*> getSuccessors(node* current)
@@ -89,37 +89,23 @@ std::list<node*> getSuccessors(node* current)
 	node* left = new node;
 	left->st.push_back(current->st[0]);
 	left->st.push_back(current->st[1]-1);
-	left->st.push_back(current->st[2]+1);
-	if (left->st[2]<targetLocs.size())
 	if (left->st[1]>=0)
 		neighbor_states.push_back(left);
 	node* right = new node;
 	right->st.push_back(current->st[0]);
 	right->st.push_back(current->st[1]+1);
-	right->st.push_back(current->st[2]+1);
-	if (right->st[2]<targetLocs.size())
 	if (right->st[1]<gridSize)
 		neighbor_states.push_back(right);
 	node* up = new node;
 	up->st.push_back(current->st[0]-1);
 	up->st.push_back(current->st[1]);
-	up->st.push_back(current->st[2]+1);
-	if (up->st[2]<targetLocs.size())
 	if (up->st[0]>=0)
 		neighbor_states.push_back(up);
 	node* down = new node;
 	down->st.push_back(current->st[0]+1);
 	down->st.push_back(current->st[1]);
-	down->st.push_back(current->st[2]+1);
-	if (down->st[2]<targetLocs.size())
 	if (down->st[0]<gridSize)
 		neighbor_states.push_back(down);	
-	node* same = new node;
-	same->st.push_back(current->st[0]);
-	same->st.push_back(current->st[1]);
-	same->st.push_back(current->st[2]+1);
-	if (same->st[2]<targetLocs.size())
-		neighbor_states.push_back(same);
 	return neighbor_states;
 }
 
@@ -130,7 +116,7 @@ float edgeCost(state start, state goal)
 
 float computeHeuristic(state start, state goal)
 {
-	return sqrt(pow(start[0]-goal[0],2) + pow(start[1]-goal[1],2));
+	return 0;
 }
 
 int main(int argc, char *argv[])
@@ -160,7 +146,7 @@ int main(int argc, char *argv[])
 				int y = atoi(r.substr(r.find(",")+1).c_str());
 				start->st.push_back(x);
 				start->st.push_back(y);
-				start->st.push_back(0);
+				//start->st.push_back(0);
 			}
 			if (STRING.find("T")!=STRING.npos)
 			{
@@ -191,14 +177,14 @@ int main(int argc, char *argv[])
 					vector<int> v;
 					v.push_back(x);
 					v.push_back(y);
-					v.push_back(targetStep);
+					//v.push_back(targetStep);
 					targetLocs.push_back(v);
 					targetStep = targetStep + 1;
 				}
 
 			}
 		}
-		goal->st = targetLocs[4];
+		goal->st = targetLocs[0];
 		aStar(start, goal);
 	}
 }
