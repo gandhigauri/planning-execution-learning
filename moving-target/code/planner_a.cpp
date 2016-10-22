@@ -5,12 +5,17 @@ using namespace std;
 std::list<state> aStar(node* start_node, std::vector<node*> goals)
 {
 	cout<<"starting plan"<<endl;
+	std::set<node*> openSet;
+	std::set<state> closedSet;
+	std::list<node*> successors;
+	std::list<state> path;
+	bool found_goal;
 	node* current = NULL;
 	node* last_node = NULL;
 	start_node->g = 0;
 	for (int i = 0; i < goals.size(); i++)
 		goals[i]->g = numeric_limits<float>::infinity();
-	start_node->h = 0;//computeHeuristic(start_node, goal_node);
+	start_node->h = computeHeuristic(start_node, goals);
 	start_node->f = start_node->g + start_node->h;
 	openSet.insert(start_node);
 	int total_states = 0;
@@ -54,7 +59,7 @@ std::list<state> aStar(node* start_node, std::vector<node*> goals)
 				continue;
 			neighbor->parent = current;
 			neighbor->g = neighbor_g;
-			neighbor->h = 0;//computeHeuristic(neighbor, goal_node);
+			neighbor->h = computeHeuristic(neighbor, goals);
 			neighbor->f = neighbor->g + neighbor->h;
 		}
 	
@@ -79,11 +84,11 @@ std::list<state> aStar(node* start_node, std::vector<node*> goals)
 		path.push_front(start_node->st);
 		int pathLen = path.size();//0;
 		cout<<"total path length "<<pathLen<<endl;
-		for (std::list<state>::iterator itr = path.begin(); itr != path.end(); itr ++)
+		/*for (std::list<state>::iterator itr = path.begin(); itr != path.end(); itr ++)
 		{
 			state next_state = *itr;
 			cout<<" x "<<next_state[0]<<" y "<<next_state[1]<<" t "<<next_state[2]<<endl;
-		}
+		}*/
 		return path;
 		
 	}
@@ -134,11 +139,19 @@ float edgeCost(state start, state goal)
 	return gridCost[goal[0]][goal[1]];
 }
 
-float computeHeuristic(node* start, node* goal)
+float computeHeuristic(node* start, std::vector<node*> goals)
 {
+	float time_diff = numeric_limits<float>::infinity();
+	for (int i = 0; i < goals.size(); i++)
+	{
+		float min_time = goals[i]->st[2] - start->st[2];
+		if (min_time<time_diff)
+			time_diff = min_time;
+	}
+	return (gridH[start->st[0]][start->st[1]] + time_diff);	
 	//float h = dijkstra(start, goal);
 	//return h;
-	return sqrt(pow(start->st[0]-goal->st[0],2) + pow(start->st[1]-goal->st[1],2));
+	//return sqrt(pow(start->st[0]-goal->st[0],2) + pow(start->st[1]-goal->st[1],2));
 }
 
 int main(int argc, char *argv[])
@@ -181,11 +194,11 @@ int main(int argc, char *argv[])
 						{
 							getline(infile, t);
 							istringstream ss(t);
-							vector<int> rowCost;
+							vector<float> rowCost;
 							while (ss)
 							{
 								if (!getline(ss,t,',')) break;
-								int c = atoi(t.c_str());
+								float c = atof(t.c_str());
 								rowCost.push_back(c);
 
 							}
@@ -206,6 +219,27 @@ int main(int argc, char *argv[])
 
 			}
 		}
+		cout<<"calculating all h costs"<<endl;
+		int a=0;
+		for (int r = 0; r < gridSize; r++)
+		{	
+			vector<float> rowCost;
+			for (int c = 0; c < gridSize; c++)
+			{
+				cout<<a<<endl;
+				a = a+1; 
+				node* initial = new node;
+				initial->st.push_back(r);
+				initial->st.push_back(c);
+				int h;
+				for (int i = 0; i < targetLocs.size(); i++)
+					if (initial->st[0]!=targetLocs[i]->st[0] && initial->st[1]!=targetLocs[i]->st[1])
+						h = dijkstra(initial, targetLocs, gridSize, gridCost);
+				rowCost.push_back(h);
+			}
+			gridH.push_back(rowCost);
+		}	
+		cout<<"calculated all h costs"<<endl;
 		aStar(start, targetLocs);
 	}
 }
