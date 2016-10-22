@@ -22,13 +22,15 @@ struct node
 };
 
 int gridSize;
-std::vector<std::vector<int> > targetLocs;
+std::vector<node*> targetLocs;
 std::vector<std::vector<int> > gridCost;
 
-std::list<state> aStar(node*, node*);
+//std::list<state> aStar(node*, node*);
+std::list<state> aStar(node*, std::vector<node*>);
 std::list<node*> getSuccessors(node*);
 float edgeCost(state, state);
-float computeHeuristic(state, state);
+float computeHeuristic(node*, node*);
+float dijkstra(node*, node*);
 
 std::set<node*> openSet;
 std::set<state> closedSet;

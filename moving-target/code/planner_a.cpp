@@ -2,14 +2,15 @@
 
 using namespace std;
 
-std::list<state> aStar(node* start_node, node* goal_node)
+std::list<state> aStar(node* start_node, std::vector<node*> goals)
 {
 	cout<<"starting plan"<<endl;
 	node* current = NULL;
 	node* last_node = NULL;
 	start_node->g = 0;
-	goal_node->g = numeric_limits<float>::infinity();
-	start_node->h = computeHeuristic(start_node->st, goal_node->st);
+	for (int i = 0; i < goals.size(); i++)
+		goals[i]->g = numeric_limits<float>::infinity();
+	start_node->h = 0;//computeHeuristic(start_node, goal_node);
 	start_node->f = start_node->g + start_node->h;
 	openSet.insert(start_node);
 	int total_states = 0;
@@ -27,13 +28,16 @@ std::list<state> aStar(node* start_node, node* goal_node)
 				current = temp;
 			}
 		}
-		if (equal(current->st.begin(),current->st.end(),goal_node->st.begin()))//if (isEqual(current->st, goal_node->st))
-		{
-			last_node = current;
-			cout<<"found goal"<<endl;
-			found_goal = 1;
+		for (int i = 0; i < goals.size(); i++)
+			if (equal(current->st.begin(),current->st.end(),goals[i]->st.begin()))//if (isEqual(current->st, goal_node->st))
+			{
+				last_node = current;
+				cout<<"found goal"<<" x "<<current->st[0]<<" y "<<current->st[1]<<" t "<<current->st[2]<<endl;
+				found_goal = 1;
+				break;
+			}
+		if (found_goal)
 			break;
-		}
 		openSet.erase(current);
 		closedSet.insert(current->st);
 		total_states = total_states + 1;
@@ -50,7 +54,7 @@ std::list<state> aStar(node* start_node, node* goal_node)
 				continue;
 			neighbor->parent = current;
 			neighbor->g = neighbor_g;
-			neighbor->h = computeHeuristic(neighbor->st, goal_node->st);
+			neighbor->h = 0;//computeHeuristic(neighbor, goal_node);
 			neighbor->f = neighbor->g + neighbor->h;
 		}
 	
@@ -66,18 +70,20 @@ std::list<state> aStar(node* start_node, node* goal_node)
 		cout<<"total cost of plan "<<last_node->g<<endl;
 		while (last_node->st != start_node->st)
 		{
-			if (last_node->st == goal_node->st)
-				path.push_front(goal_node->st);
-			else
-				path.push_front(last_node->st);
+			path.push_front(last_node->st);
 			if (last_node->parent != NULL)
 				last_node = last_node->parent;
 		}
 		cout<<"returning plan"<<endl;
 		cout<<"Total states explored "<<total_states<<endl;
 		path.push_front(start_node->st);
-		int num_steps = path.size();//0;
-		cout<<"total time steps "<<num_steps<<endl;
+		int pathLen = path.size();//0;
+		cout<<"total path length "<<pathLen<<endl;
+		for (std::list<state>::iterator itr = path.begin(); itr != path.end(); itr ++)
+		{
+			state next_state = *itr;
+			cout<<" x "<<next_state[0]<<" y "<<next_state[1]<<" t "<<next_state[2]<<endl;
+		}
 		return path;
 		
 	}
@@ -128,9 +134,11 @@ float edgeCost(state start, state goal)
 	return gridCost[goal[0]][goal[1]];
 }
 
-float computeHeuristic(state start, state goal)
+float computeHeuristic(node* start, node* goal)
 {
-	return sqrt(pow(start[0]-goal[0],2) + pow(start[1]-goal[1],2));
+	//float h = dijkstra(start, goal);
+	//return h;
+	return sqrt(pow(start->st[0]-goal->st[0],2) + pow(start->st[1]-goal->st[1],2));
 }
 
 int main(int argc, char *argv[])
@@ -141,7 +149,6 @@ int main(int argc, char *argv[])
 	{
 		ifstream infile(argv[1]);
 		node* start = new node;
-		node* goal = new node;
 		string STRING;
 		int targetStep = 0;
 		while (getline(infile, STRING))
@@ -188,17 +195,17 @@ int main(int argc, char *argv[])
 					}
 					int x = atoi(t.substr(0,t.find(",")).c_str());
 					int y = atoi(t.substr(t.find(",")+1).c_str());
-					vector<int> v;
-					v.push_back(x);
-					v.push_back(y);
-					v.push_back(targetStep);
-					targetLocs.push_back(v);
+					node* goal = new node;
+					//vector<int> v;
+					goal->st.push_back(x);
+					goal->st.push_back(y);
+					goal->st.push_back(targetStep);
+					targetLocs.push_back(goal);
 					targetStep = targetStep + 1;
 				}
 
 			}
 		}
-		goal->st = targetLocs[4];
-		aStar(start, goal);
+		aStar(start, targetLocs);
 	}
 }

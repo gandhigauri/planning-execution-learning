@@ -9,7 +9,7 @@ float dijkstra(node* start_node, node* goal_node)
 	node* last_node = NULL;
 	start_node->g = 0;
 	goal_node->g = numeric_limits<float>::infinity();
-	start_node->h = computeHeuristic(start_node->st, goal_node->st);
+	start_node->h = computeHeuristic(start_node, goal_node);
 	start_node->f = start_node->g + start_node->h;
 	openSet.insert(start_node);
 	int total_states = 0;
@@ -50,7 +50,7 @@ float dijkstra(node* start_node, node* goal_node)
 				continue;
 			neighbor->parent = current;
 			neighbor->g = neighbor_g;
-			neighbor->h = computeHeuristic(neighbor->st, goal_node->st);
+			neighbor->h = computeHeuristic(neighbor, goal_node);
 			neighbor->f = neighbor->g + neighbor->h;
 		}
 	
@@ -80,7 +80,7 @@ float dijkstra(node* start_node, node* goal_node)
 		cout<<"t = "<<num_steps;
 		cout<<endl;
 	}*/
-	return path;
+	return last_node->g;
 }
 
 std::list<node*> getSuccessors(node* current)
@@ -114,77 +114,8 @@ float edgeCost(state start, state goal)
 	return gridCost[goal[0]][goal[1]];
 }
 
-float computeHeuristic(state start, state goal)
+float computeHeuristic(node* start, node* goal)
 {
 	return 0;
 }
 
-int main(int argc, char *argv[])
-{
-	if (argc != 2)
-		cout<<"usage: "<< argv[0] <<" <filename>"<<endl;
-	else
-	{
-		ifstream infile(argv[1]);
-		node* start = new node;
-		node* goal = new node;
-		string STRING;
-		int targetStep = 0;
-		while (getline(infile, STRING))
-		{
-			if (STRING.find("N")!=STRING.npos)
-			{
-				string n;
-				getline(infile, n);
-				gridSize = atoi(n.c_str());
-			}
-			if (STRING.find("R")!=STRING.npos)
-			{
-				string r;
-				getline(infile, r);
-				int x = atoi(r.substr(0,r.find(",")).c_str());
-				int y = atoi(r.substr(r.find(",")+1).c_str());
-				start->st.push_back(x);
-				start->st.push_back(y);
-				//start->st.push_back(0);
-			}
-			if (STRING.find("T")!=STRING.npos)
-			{
-				//string b;
-				while (STRING.find("B")==STRING.npos)
-				{
-					string t;
-					getline(infile, t);
-					if (t.find("B")!=STRING.npos){
-						for (int i = 0; i < gridSize; i++)
-						{
-							getline(infile, t);
-							istringstream ss(t);
-							vector<int> rowCost;
-							while (ss)
-							{
-								if (!getline(ss,t,',')) break;
-								int c = atoi(t.c_str());
-								rowCost.push_back(c);
-
-							}
-							gridCost.push_back(rowCost);
-						}
-						break;
-					}
-					int x = atoi(t.substr(0,t.find(",")).c_str());
-					int y = atoi(t.substr(t.find(",")+1).c_str());
-					vector<int> v;
-					v.push_back(x);
-					v.push_back(y);
-					//v.push_back(targetStep);
-					targetLocs.push_back(v);
-					targetStep = targetStep + 1;
-				}
-
-			}
-		}
-		goal->st = targetLocs[0];
-		aStar(start, goal);
-	}
-}
