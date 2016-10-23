@@ -6,7 +6,7 @@ std::list<state> aStar(node* start_node, std::vector<node*> goals)
 {
 	cout<<"starting plan"<<endl;
 	std::set<node*> openSet;
-	std::set<state> closedSet;
+	std::map<state,bool> closedCheck, openCheck;
 	std::list<node*> successors;
 	std::list<state> path;
 	bool found_goal;
@@ -18,6 +18,7 @@ std::list<state> aStar(node* start_node, std::vector<node*> goals)
 	start_node->h = computeHeuristic(start_node, goals);
 	start_node->f = start_node->g + start_node->h;
 	openSet.insert(start_node);
+	openCheck[start_node->st] = 1;
 	int total_states = 0;
 	found_goal = 0;
 	while (!openSet.empty())
@@ -44,17 +45,21 @@ std::list<state> aStar(node* start_node, std::vector<node*> goals)
 		if (found_goal)
 			break;
 		openSet.erase(current);
-		closedSet.insert(current->st);
+		openCheck[current->st] = 0;
+		closedCheck[current->st] = 1;
 		total_states = total_states + 1;
 		successors = getSuccessors(current);
 		for (std::list<node*>::iterator itr = successors.begin(); itr != successors.end(); itr ++)
 		{
 			node* neighbor = *itr;
-			if (closedSet.find(neighbor->st) != closedSet.end())
+			if (closedCheck[neighbor->st])
 				continue;
 			float neighbor_g = current->g + edgeCost(current->st, neighbor->st);
-			if (openSet.find(neighbor) == openSet.end())
+			if (!openCheck[neighbor->st])
+			{
+				openCheck[neighbor->st] = 1;	
 				openSet.insert(neighbor);
+			}
 			else if (neighbor_g >= neighbor->g)
 				continue;
 			neighbor->parent = current;
@@ -84,11 +89,11 @@ std::list<state> aStar(node* start_node, std::vector<node*> goals)
 		path.push_front(start_node->st);
 		int pathLen = path.size();//0;
 		cout<<"total path length "<<pathLen<<endl;
-		/*for (std::list<state>::iterator itr = path.begin(); itr != path.end(); itr ++)
+		for (std::list<state>::iterator itr = path.begin(); itr != path.end(); itr ++)
 		{
 			state next_state = *itr;
 			cout<<" x "<<next_state[0]<<" y "<<next_state[1]<<" t "<<next_state[2]<<endl;
-		}*/
+		}
 		return path;
 		
 	}
@@ -209,9 +214,13 @@ int main(int argc, char *argv[])
 					int x = atoi(t.substr(0,t.find(",")).c_str());
 					int y = atoi(t.substr(t.find(",")+1).c_str());
 					node* goal = new node;
+					node* goal2D = new node;
 					//vector<int> v;
 					goal->st.push_back(x);
 					goal->st.push_back(y);
+					goal2D->st.push_back(x);
+					goal2D->st.push_back(y);
+					target2D.push_back(goal2D);
 					goal->st.push_back(targetStep);
 					targetLocs.push_back(goal);
 					targetStep = targetStep + 1;
@@ -220,26 +229,18 @@ int main(int argc, char *argv[])
 			}
 		}
 		cout<<"calculating all h costs"<<endl;
-		int a=0;
-		for (int r = 0; r < gridSize; r++)
-		{	
-			vector<float> rowCost;
-			for (int c = 0; c < gridSize; c++)
-			{
-				cout<<a<<endl;
-				a = a+1; 
-				node* initial = new node;
-				initial->st.push_back(r);
-				initial->st.push_back(c);
-				int h;
-				for (int i = 0; i < targetLocs.size(); i++)
-					if (initial->st[0]!=targetLocs[i]->st[0] && initial->st[1]!=targetLocs[i]->st[1])
-						h = dijkstra(initial, targetLocs, gridSize, gridCost);
-				rowCost.push_back(h);
-			}
-			gridH.push_back(rowCost);
-		}	
+		int startDij=clock();
+		gridH = dijkstra(target2D, gridSize, gridCost);
+		int stopDij=clock();
 		cout<<"calculated all h costs"<<endl;
+		cout << "Dijkstra run time in seconds: " << (stopDij-startDij)/double(CLOCKS_PER_SEC)*1000 << endl;
+		/*for (int i = 0; i < gridSize; i++){
+			for (int j = 0; j < gridSize; j++)
+				cout<<gridH[i][j]<<" ";
+			cout<<endl;}*/
+		int startAstar=clock();
 		aStar(start, targetLocs);
+		int stopAstar=clock();
+		cout << "Astar run time in seconds: " << (stopAstar-startAstar)/double(CLOCKS_PER_SEC)*1000 << endl;
 	}
 }
