@@ -89,11 +89,11 @@ std::list<state> aStar(node* start_node, std::vector<node*> goals)
 		path.push_front(start_node->st);
 		int pathLen = path.size();//0;
 		cout<<"total path length "<<pathLen<<endl;
-		for (std::list<state>::iterator itr = path.begin(); itr != path.end(); itr ++)
+		/*for (std::list<state>::iterator itr = path.begin(); itr != path.end(); itr ++)
 		{
 			state next_state = *itr;
 			cout<<" x "<<next_state[0]<<" y "<<next_state[1]<<" t "<<next_state[2]<<endl;
-		}
+		}*/
 		return path;
 		
 	}
@@ -153,7 +153,7 @@ float computeHeuristic(node* start, std::vector<node*> goals)
 		if (min_time<time_diff)
 			time_diff = min_time;
 	}
-	return (gridH[start->st[0]][start->st[1]] + time_diff);	
+	return (gridH[start->st[0]][start->st[1]] + 0.5*time_diff);	
 	//float h = dijkstra(start, goal);
 	//return h;
 	//return sqrt(pow(start->st[0]-goal->st[0],2) + pow(start->st[1]-goal->st[1],2));
@@ -228,19 +228,49 @@ int main(int argc, char *argv[])
 
 			}
 		}
+
 		cout<<"calculating all h costs"<<endl;
-		int startDij=clock();
-		gridH = dijkstra(target2D, gridSize, gridCost);
-		int stopDij=clock();
-		cout<<"calculated all h costs"<<endl;
-		cout << "Dijkstra run time in seconds: " << (stopDij-startDij)/double(CLOCKS_PER_SEC)*1000 << endl;
-		/*for (int i = 0; i < gridSize; i++){
-			for (int j = 0; j < gridSize; j++)
-				cout<<gridH[i][j]<<" ";
-			cout<<endl;}*/
+		if (gridSize==1000)
+		{		
+			ifstream hfile("heuristic.txt");
+			string hr;
+			while (getline(hfile, hr))
+			{
+				istringstream ss(hr);
+				vector<float> rowCost;
+				while (ss)
+				{
+					if (!getline(ss,hr,',')) break;
+					float c = atof(hr.c_str());
+					rowCost.push_back(c);
+
+				}
+				gridH.push_back(rowCost);
+			}
+			for (int i = 0; i < gridSize; i++)
+				for (int j = 0; j < gridSize; j++)
+					if (gridH[i][j] > 0)
+						gridH[i][j] = gridH[i][j] - gridCost[i][j];
+		}
+		else
+		{
+
+			int startDij=clock();
+			gridH = dijkstra(target2D, gridSize, gridCost);
+			int stopDij=clock();
+			cout<<"calculated all h costs"<<endl;
+			cout << "Dijkstra run time: " << (stopDij-startDij)/double(CLOCKS_PER_SEC)*1000 << endl;
+			for (int i = 0; i < gridSize; i++)
+				for (int j = 0; j < gridSize; j++)
+					if (gridH[i][j] > 0)
+						gridH[i][j] = gridH[i][j] - gridCost[i][j];
+		}
+
+
+		
 		int startAstar=clock();
 		aStar(start, targetLocs);
 		int stopAstar=clock();
-		cout << "Astar run time in seconds: " << (stopAstar-startAstar)/double(CLOCKS_PER_SEC)*1000 << endl;
+		cout << "Astar run time: " << (stopAstar-startAstar)/double(CLOCKS_PER_SEC)*1000 << endl;
 	}
 }
