@@ -50,15 +50,42 @@ vector<vector<float>> generateQTable(int numStates, int numActions)
     iterEpisode++;
   }
   myFile.close();
+  /*print qtable*/
+  /*for (int i = 0; i < numStates ; i++)
+  {
+    for (int j = 0; j < numActions ; j++)
+      cout<<qTable[i][j]<<"  ";
+    cout<<endl;
+  }*/
   return qTable;
 }
 
-map<State, Action> generatePolicy(vector<vector<float>> qTable)
+vector<vector<Action>> generatePolicy(vector<vector<float>> qTable)
 {
+  vector<vector<Action>> optimalPolicy(MAX_GRID, vector<Action>(MAX_GRID));
   for (int i =0; i<qTable.size(); i++)
   {
+    int x = i/MAX_GRID;
+    int y = i%MAX_GRID;
     int act = max_element(qTable[i].begin(), qTable[i].end()) - qTable[i].begin();
+    optimalPolicy[x][y] = Action(act);
   }
+  for (int i = 0; i < MAX_GRID; i++)
+  {
+    for (int j = 0; j < MAX_GRID; j++)
+    {
+      if (optimalPolicy[i][j] == 0)
+        cout<<"N"<<"  ";
+      else if (optimalPolicy[i][j] == 1)
+        cout<<"S"<<"  ";
+      else if (optimalPolicy[i][j] == 2)
+        cout<<"E"<<"  ";
+      else if (optimalPolicy[i][j] == 3)
+        cout<<"W"<<"  ";
+    }
+    cout<<endl;
+  } 
+  return optimalPolicy;
 }
 
 int main (void)
@@ -72,12 +99,8 @@ int main (void)
   int numActions = 4;
   vector<vector<float>> qTable(numStates, vector<float>(numActions));
   qTable = generateQTable(numStates, numActions);
-  /*print qtable*/
-  for (int i = 0; i < numStates ; i++)
-  {
-    for (int j = 0; j < numActions ; j++)
-      cout<<qTable[i][j]<<"  ";
-    cout<<endl;
-  }
+  vector<vector<Action>> optimalPolicy;
+  optimalPolicy = generatePolicy(qTable);
+
   return 0;
 }
